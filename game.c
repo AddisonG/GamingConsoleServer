@@ -16,6 +16,13 @@
 #define OK 28
 #define BACK 14
 
+
+struct game_state {
+	int score;
+	int x;
+	int y;
+};
+
 struct button_state {
     int up;  // Top left
     int down;  // Bottom left
@@ -37,7 +44,7 @@ int setup_buttons(char* devname) {
 }
 
 
-struct button_state read_buttons(int fd) {
+void read_buttons(int fd) {
     struct input_event ev;
     prev_buttons = buttons; // save previous state
 
@@ -70,8 +77,6 @@ struct button_state read_buttons(int fd) {
             }
         }
     }
-
-    return buttons;
 }
 
 
@@ -111,48 +116,52 @@ void draw_box(struct fb *fb, int x_orig, int y_orig, int width, int height, bool
 }
 
 
+void play(struct game_state *game, struct fb *fb) {
+	//render_string(fb, ft, "-Opengear IM7200-", false, 0, 38);
+
+	//printf("Frame: %d\n", frame);
+	draw_box(fb, game->x, game->y, 20, 20, true);
+
+	if (buttons.up) {
+		game->x += 5;
+	}
+	if (buttons.down) {
+		game->x -= 5;
+	}
+	if (buttons.ok) {
+		game->y -= 5;
+	}
+	if (buttons.back) {
+		game->y += 5;
+	}
+}
+
+
 int main(int argc, char **argv) {
     char devname[] = "/dev/input/event0";
 
     int fd = setup_buttons(devname);
 	struct fb *fb = fb_init("/dev/fb0");
 	struct font *ft = load_font("/etc/lcd-assets/Tamsyn6x12r.psf");
+	struct game_state game;
+	game.x = 20;
+	game.y = 20;
 
 	int frame = 0;
-	int x = 0, y = 0;
 
     while (true) {
 		frame++;
 		clear_buffer(fb);
-		draw_box(fb, x, y, 20, 20, true);
-		//render_string(fb, ft, "-Opengear IM7200-", false, 0, 38);
+		read_buttons(fd);
+
+		// Game logic
+
+		play(&game, fb);
+
 		swap_buffer(fb);
-		//free_font(ft);
-		//close_fb(fb);
-		//return 0;
-
-        struct button_state buttons = read_buttons(fd);
-
-        printf("Frame: %d\n", frame);
-
-        if (buttons.up) {
-            printf("Up key is pressed\n");
-			x += 5;
-        }
-        if (buttons.down) {
-            printf("Down key is pressed\n");
-			x -= 5;
-        }
-        if (buttons.ok) {
-            printf("OK key is pressed\n");
-			y -= 5;
-        }
-        if (buttons.back) {
-            printf("back key is pressed\n");
-			y += 5;
-        }
         usleep(1000 * 100);
     }
+	free_font(ft);
 
     close(fd);
     return EXIT_SUCCESS;
