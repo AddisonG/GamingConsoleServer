@@ -10,7 +10,10 @@ ETHAN_PROGS = $(patsubst ethan/%.c,ethan/%,$(ETHAN_SRCS))
 
 .PHONY: install scp all clean ethan
 
-output/game: $(OBJS)
+output/snake: snake.c engine.o
+	$(CC) $(CFLAGS) -o $@ $^ -L/home/addison/personal/hackathon-2023 -lfb
+
+output/space: space.c engine.o
 	$(CC) $(CFLAGS) -o $@ $^ -L/home/addison/personal/hackathon-2023 -lfb
 
 ethan/%: ethan/%.c
@@ -19,7 +22,7 @@ ethan/%: ethan/%.c
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-install: $(PROGS)
+install: output/snake output/space
 
 scp: install
 	scp output/* root@192.168.75.140:/var/mnt/storage.usb/

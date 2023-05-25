@@ -1,6 +1,7 @@
 #include "engine.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <stdio.h>
 
 #define MAX_SNAKE_LEN 64
@@ -68,7 +69,7 @@ bool move(struct game_state *game, struct button_state *buttons, struct fb *fb) 
 	}
 
 	// Draw the snake
-	printf("Drawing snake\n");
+	printf("Rendering\n");
 	clear_buffer(fb);
 	for (int i = 0; i < game->length; i++) {
 		if (i == 0) {
@@ -115,10 +116,11 @@ bool move(struct game_state *game, struct button_state *buttons, struct fb *fb) 
 
 int main(int argc, char **argv) {
 	printf("INIT\n");
+    srand(time(0));
 	char devname[] = "/dev/input/event0";
 
 	int fd = setup_buttons(devname);
-	struct font *ft = load_font("/etc/lcd-assets/Tamsyn6x12r.psf");
+	struct font *ft = load_font("Tamsyn6x12r.psf");
 	struct fb *fb = fb_init("/dev/fb0");
 	struct game_state game = {0};
 	int frame_num = 0;
@@ -155,8 +157,6 @@ int main(int argc, char **argv) {
 			render_string(fb, ft, "= YOU LOSE =", false, 22, 28);
 			render_string(fb, ft, score_string, false, 33, 36);
 			swap_buffer(fb);
-
-			sleep(15);
 
 			return EXIT_SUCCESS;
 		}
