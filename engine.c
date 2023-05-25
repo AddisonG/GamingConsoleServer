@@ -7,8 +7,8 @@
 #include <errno.h>
 #include <string.h>
 
-struct button_state prev_buttons = {0, 0, 0, 0};
-struct button_state buttons = {0, 0, 0, 0};
+struct button_state true_buttons = {0, 0, 0, 0};
+struct button_state return_buttons = {0, 0, 0, 0};
 
 int setup_buttons(char* devname) {
 	printf("SETTING UP BUTTONS\n");
@@ -22,7 +22,7 @@ int setup_buttons(char* devname) {
 
 struct button_state* read_buttons(int fd) {
     struct input_event ev;
-    prev_buttons = buttons; // save previous state
+    return_buttons = true_buttons;
 
     while (1) {
         ssize_t n = read(fd, &ev, sizeof(struct input_event));
@@ -33,27 +33,38 @@ struct button_state* read_buttons(int fd) {
             }
             break;
         } else if (n >= sizeof(struct input_event)) {
+			// The strange math means that any NEW push will always result in a positive number.
+			// Any existing push will be overridden by releasing it.
             if (ev.type == EV_KEY) {
                 switch (ev.code) {
-                    case UP:
-                        buttons.up = ev.value == KEY_PRESS ? 1 : 0;
+                    case UP_BUTTON:
+                        true_buttons.up = ev.value;
+                        return_buttons.up += (ev.value * 5) - 1;
                         break;
-                    case DOWN:
-                        buttons.down = ev.value == KEY_PRESS ? 1 : 0;
+                    case DOWN_BUTTON:
+                        true_buttons.down = ev.value;
+                        return_buttons.down += (ev.value * 5) - 1;
                         break;
-                    case OK:
-                        buttons.ok = ev.value == KEY_PRESS ? 1 : 0;
+                    case OK_BUTTON:
+                        true_buttons.ok = ev.value;
+                        return_buttons.ok += (ev.value * 5) - 1;
                         break;
-                    case BACK:
-                        buttons.back = ev.value == KEY_PRESS ? 1 : 0;
-                        break;
-                    default:
+                    case BACK_BUTTON:
+                        true_buttons.back = ev.value;
+                        return_buttons.back += (ev.value * 5) - 1;
                         break;
                 }
             }
         }
     }
-	return &buttons;
+
+    // Convert negatives into 0 (false)
+	return_buttons.up = return_buttons.up > 0;
+	return_buttons.down = return_buttons.down > 0;
+	return_buttons.ok = return_buttons.ok > 0;
+	return_buttons.back = return_buttons.back > 0;
+
+	return &return_buttons;
 }
 
 void draw_box(struct fb *fb, int x_orig, int y_orig, int width, int height, bool filled) {
@@ -90,4 +101,3 @@ void draw_box(struct fb *fb, int x_orig, int y_orig, int width, int height, bool
 		}
 	}
 }
-
