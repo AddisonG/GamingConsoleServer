@@ -8,7 +8,6 @@
 #define WIDTH 25
 #define HEIGHT 13
 
-
 #define UP 0
 #define LEFT 1
 #define DOWN 2
@@ -24,7 +23,7 @@ struct game_state {
 };
 
 
-void move(struct game_state *game, struct button_state *buttons, struct fb *fb) {
+bool move(struct game_state *game, struct button_state *buttons, struct fb *fb) {
 	// Move the tail of the snake
 	printf("Moving tail\n");
 	for (int i = game->length; i > 0; i--) {
@@ -54,12 +53,18 @@ void move(struct game_state *game, struct button_state *buttons, struct fb *fb) 
 			break;
 	}
 
-	// Check the head of the snake hasn't overlapped anything, or eaten food
+	// Check if the head of the snake overlaps food
 	if (game->y[0] == game->food_y && game->x[0] == game->food_x) {
 		printf("NOM NOM NOM\n");
 		game->length++;
 		game->food_x = rand() % WIDTH;
 		game->food_y = rand() % HEIGHT;
+	}
+	// Check if the head of the snake has overlapped any part of the body
+	for (int i = 1; i < game->length; i++) {
+		if (game->x[0] == game->x[i] && game->y[0] == game->y[i]) {
+			return 1;
+		}
 	}
 
 	// Draw the snake
@@ -105,6 +110,7 @@ void move(struct game_state *game, struct button_state *buttons, struct fb *fb) 
 		game->direction = (game->direction + 4 - 1) % 4;
 		printf("DOWN\n");
 	}
+	return 0;
 }
 
 int main(int argc, char **argv) {
@@ -112,6 +118,7 @@ int main(int argc, char **argv) {
 	char devname[] = "/dev/input/event0";
 
 	int fd = setup_buttons(devname);
+	struct font *ft = load_font("/etc/lcd-assets/Tamsyn6x12r.psf");
 	struct fb *fb = fb_init("/dev/fb0");
 	struct game_state game = {0};
 	int frame_num = 0;
@@ -135,17 +142,35 @@ int main(int argc, char **argv) {
 		frame_num++;
 		struct button_state *buttons = read_buttons(fd);
 
-		move(&game, buttons, fb);
+		if (move(&game, buttons, fb)) {
+			printf("GAME OVER!\n");
+
+			int score = game.length - 4;
+			char score_string[50];
+			sprintf(score_string, "SCORE: %d", score);
+
+			clear_buffer(fb);
+			draw_box(fb, 1, 1, 126, 62, false);
+			render_string(fb, ft, "= GAME OVER =", false, 20, 20);
+			render_string(fb, ft, "= YOU LOSE =", false, 22, 28);
+			render_string(fb, ft, score_string, false, 33, 36);
+			swap_buffer(fb);
+
+			sleep(15);
+
+			return EXIT_SUCCESS;
+		}
 
 		// Get 10% faster every 100 frames
 		if (frame_num % 100 == 99) {
 			speed = speed / 1.1;
-			printf("New speed: %f\n", speed);
+			printf("==SPEED INCREASE==!\nNew speed: %d\n", speed);
 		}
 
 		usleep(1000 * speed);
 	}
 
+	free_font(ft);
 	close(fd);
 	return EXIT_SUCCESS;
 }
