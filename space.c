@@ -157,6 +157,18 @@ int main(int argc, char **argv) {
 		if (play(&game, buttons, fb)) {
 			printf("GAME OVER\n");
 			printf("Score: %d\n", game.score);
+
+			usleep(1000 * 1000 * 3);
+
+			char score_string[50];
+			sprintf(score_string, "SCORE: %d", game.score);
+
+			clear_buffer(fb);
+			draw_box(fb, 1, 1, 126, 62, false);
+			render_string(fb, ft, "= GAME OVER =", false, 20, 20);
+			render_string(fb, ft, "= YOU LOSE =", false, 22, 28);
+			render_string(fb, ft, score_string, false, 33, 36);
+			swap_buffer(fb);
 			return EXIT_SUCCESS;
 		}
 
