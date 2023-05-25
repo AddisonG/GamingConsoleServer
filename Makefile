@@ -4,16 +4,20 @@ CFLAGS += -Wl,--unresolved-symbols=ignore-all
 
 SRCS = $(wildcard *.c)
 PROGS = $(patsubst %.c,output/%,$(SRCS))
+OBJS = $(patsubst %.c,%.o,$(SRCS))
 ETHAN_SRCS = $(wildcard ethan/*.c)
 ETHAN_PROGS = $(patsubst ethan/%.c,ethan/%,$(ETHAN_SRCS))
 
 .PHONY: install scp all clean ethan
 
-output/%: %.c
-	$(CC) $(CFLAGS) -o $@ $< -L/home/addison/personal/hackathon-2023 -lfb
+output/game: $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ -L/home/addison/personal/hackathon-2023 -lfb
 
 ethan/%: ethan/%.c
 	$(CC) $(CFLAGS) -o $@ $< -L/home/addison/personal/hackathon-2023 -lfb
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 install: $(PROGS)
 
