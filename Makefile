@@ -1,15 +1,30 @@
-#CC = arm-linux-gnueabi-gcc # or whichever cross-compiler you have installed
 CC = /home/addison/personal/hackathon-2023/armv5te-toolchain/.build/arm-unknown-linux-uclibcgnueabi/buildtools/bin/arm-unknown-linux-uclibcgnueabi-gcc
-CFLAGS = -march=armv5te
-TARGET = output/buttons
+CFLAGS += -march=armv5te
+CFLAGS += -Wl,--unresolved-symbols=ignore-all
 
-.PHONY: install scp all
+SRCS = $(wildcard *.c)
+PROGS = $(patsubst %.c,output/%,$(SRCS))
+ETHAN_SRCS = $(wildcard ethan/*.c)
+ETHAN_PROGS = $(patsubst ethan/%.c,ethan/%,$(ETHAN_SRCS))
 
-install:
-	$(CC) $(CFLAGS) -o $(TARGET) buttons.c
+.PHONY: install scp all clean ethan
+
+output/%: %.c
+	$(CC) $(CFLAGS) -o $@ $< -L/home/addison/personal/hackathon-2023 -lfb
+
+ethan/%: ethan/%.c
+	$(CC) $(CFLAGS) -o $@ $< -L/home/addison/personal/hackathon-2023 -lfb
+
+install: $(PROGS)
 
 scp: install
 	scp output/* root@192.168.75.140:/var/mnt/storage.usb/
 	scp output/* im7200:/var/mnt/storage.usb/
 
-all: install scp
+ethan:
+	rm -rf ethan/*
+	scp root@192.168.75.140:/var/mnt/storage.usb/ethan/* ethan/
+	make $(ETHAN_PROGS)
+	scp ethan/* root@192.168.75.140:/var/mnt/storage.usb/ethan/
+
+all: compile-ethan install scp
