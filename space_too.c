@@ -8,7 +8,7 @@
 
 #define GAME_WIDTH 128
 #define GAME_HEIGHT 64
-#define BUFFER_SIZE 3
+#define BUFFER_SIZE 8
 
 #define SYM_HORIZONTAL '-'
 #define SYM_EMPTY ' '
@@ -18,7 +18,7 @@
 #define SYM_BULLET "assets/s2_bullet.png"
 
 #define MAX_BULLETS 5
-#define MAX_ASTEROIDS 10
+#define MAX_ASTEROIDS 7
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -29,6 +29,13 @@
 #define Y_NONE 0
 #define Y_FORWARD -1
 #define Y_BACKWARD 1
+
+#define SHIP_W 13
+#define SHIP_H 17
+#define BULLET_W 3
+#define BULLET_H BULLET_W
+#define ASTEROID_W 12
+#define ASTEROID_H 9
 
 typedef struct bullet Bullet;
 typedef struct player Player;
@@ -79,11 +86,28 @@ bool has_player_collision(
 	Player *player,
 	Asteroid asteroid
 ) {
-	int x, y;
-	x = player->x;
-	y = player->y;
+	// Calculate the half-width and half-height of each object
+	int half_player_w = SHIP_W / 2;
+	int half_player_h = SHIP_H / 2;
+	int half_asteroid_w = ASTEROID_W / 2;
+	int half_asteroid_h = ASTEROID_H / 2;
 
-	return (asteroid.y == y && asteroid.x <= player->x + 1);
+	// Calculate the x and y coordinates of the left, right, top, and bottom edges for each object
+	int left1 = player->x - half_player_w;
+	int right1 = player->x + half_player_w;
+	int top1 = player->y - half_player_h;
+	int bottom1 = player->y + half_player_h;
+	int left2 = asteroid.x - half_asteroid_w;
+	int right2 = asteroid.x + half_asteroid_w;
+	int top2 = asteroid.y - half_asteroid_h;
+	int bottom2 = asteroid.y + half_asteroid_h;
+
+	// Check for overlap
+	if (left1 <= right2 && right1 >= left2 && top1 <= bottom2 && bottom1 >= top2) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool has_bullet_collision(
@@ -92,8 +116,17 @@ bool has_bullet_collision(
 	Asteroid asteroid
 ) {
 	Bullet bullet = player->bullets[bullet_index];
+	int a_x_min, a_y_min, a_x_max, a_y_max;
 
-	return (bullet.y == asteroid.y && bullet.x >= asteroid.x);
+	a_x_min = asteroid.x - ASTEROID_W / 2;
+	a_y_min = asteroid.y - ASTEROID_H / 2;
+	a_x_max = asteroid.x + ASTEROID_W / 2;
+	a_y_max = asteroid.y + ASTEROID_H / 2;
+
+	return (
+		(a_x_min <= bullet.x && bullet.x <= a_x_max) &&
+		(a_y_min <= bullet.y && bullet.y <= a_y_max)
+	);
 }
 
 void erase_bullet(Player* player, int bullet_index) {
@@ -296,8 +329,12 @@ void spawn_asteroid(Asteroid (*asteroids)[MAX_ASTEROIDS], int* asteroid_count) {
 
 /* View */
 void print_player(Player player, struct fb *fb) {
-	int i;
-	render_bitmap(fb, player.sym, player.x, player.y);
+	render_bitmap(
+		fb,
+		player.sym,
+		player.x - SHIP_W / 2,
+		player.y - SHIP_H / 2
+	);
 }
 
 void print_bullets(Player player, struct fb *fb) {
@@ -306,7 +343,12 @@ void print_bullets(Player player, struct fb *fb) {
 
 	for (i = 0; i < player.bullet_count; i++) {
 		bullet = player.bullets[i];
-		render_bitmap(fb, bullet.sym, bullet.x, bullet.y);
+		render_bitmap(
+			fb,
+			bullet.sym,
+			bullet.x - BULLET_W / 2,
+			bullet.y - BULLET_H / 2
+		);
 	}
 }
 
@@ -316,7 +358,12 @@ void print_asteroids(Asteroid asteroids[], int asteroid_count, struct fb *fb) {
 
 	for (i = 0; i < asteroid_count; i++) {
 		asteroid = asteroids[i];
-		render_bitmap(fb, asteroid.sym, asteroid.x, asteroid.y);
+		render_bitmap(
+			fb,
+			asteroid.sym,
+			asteroid.x - ASTEROID_W / 2,
+			asteroid.y - ASTEROID_H / 2
+		);
 	}
 }
 
@@ -368,7 +415,7 @@ int space_too(struct font *ft, struct fb *fb, int buttons_fd) {
         	if (buttons->down) {
         		player.y_dir = Y_BACKWARD;
         	}
-		if (buttons->ok) {
+		if (buttons->back) {
 			spawn_bullet(&player);
 		}
 
