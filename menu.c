@@ -39,7 +39,7 @@ void segfault_handler(int signal) {
 void draw_options(struct fb *fb, struct font *ft, int selected) {
 	clear_buffer(fb);
 	draw_box(fb, 0, 0, 128, 64, false);
-	render_string(fb, ft, "=OG GAMING CONSOLE=", false, 8, 1);
+	render_string(fb, ft, "=OG GAMING CONSOLE=", false, 7, 1);
 
 	render_string(fb, ft, "SNAKE", false, 5, 10);
 	render_string(fb, ft, "SPACE", false, 5, 19);
