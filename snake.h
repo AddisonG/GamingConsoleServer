@@ -23,7 +23,7 @@ struct snake_game {
 	int food_y;
 };
 
-bool move(struct snake_game *game, struct button_state *buttons, struct fb *fb);
+bool move_snake(struct snake_game *game, struct button_state *buttons, struct fb *fb);
 int snake(struct font *ft, struct fb *fb, int buttons_fd);
 
 #endif // SNAKE_GAME_H

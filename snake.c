@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 
-bool move(struct snake_game *game, struct button_state *buttons, struct fb *fb) {
+bool move_snake(struct snake_game *game, struct button_state *buttons, struct fb *fb) {
 	// Move the tail of the snake
 	printf("Moving tail\n");
 	for (int i = game->length; i > 0; i--) {
@@ -107,7 +107,7 @@ int snake(struct font *ft, struct fb *fb, int buttons_fd) {
 	// Speed is ms delay until next frame
 	int speed = 300;
 
-	game.length = 4;
+	game.length = 7;
 	game.direction = RIGHT;
 
 	for (int i = 0; i < game.length; i++) {
@@ -123,17 +123,17 @@ int snake(struct font *ft, struct fb *fb, int buttons_fd) {
 		frame_num++;
 		struct button_state *buttons = read_buttons(buttons_fd);
 
-		if (move(&game, buttons, fb)) {
+		if (move_snake(&game, buttons, fb)) {
 			printf("GAME OVER!\n");
 
-			int score = game.length - 4;
+			int score = game.length - 7;
 			char score_string[50];
 			sprintf(score_string, "SCORE: %d", score);
 
 			clear_buffer(fb);
 			draw_box(fb, 1, 1, 126, 62, false);
 			render_string(fb, ft, "= GAME OVER =", false, 20, 20);
-			render_string(fb, ft, "= YOU LOSE =", false, 22, 28);
+			render_string(fb, ft, "= YOU LOSE =", false, 23, 28);
 			render_string(fb, ft, score_string, false, 33, 36);
 			swap_buffer(fb);
 

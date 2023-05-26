@@ -142,7 +142,7 @@ int space(struct font *ft, struct fb *fb, int buttons_fd) {
 			clear_buffer(fb);
 			draw_box(fb, 1, 1, 126, 62, false);
 			render_string(fb, ft, "= GAME OVER =", false, 20, 20);
-			render_string(fb, ft, "= YOU LOSE =", false, 22, 28);
+			render_string(fb, ft, "= YOU LOSE =", false, 23, 28);
 			render_string(fb, ft, score_string, false, 33, 36);
 			swap_buffer(fb);
 

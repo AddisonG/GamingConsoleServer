@@ -1,6 +1,8 @@
 #include "engine.h"
 #include "space.h"
+#include "space_too.h"
 #include "snake.h"
+#include "tetris.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,8 +15,9 @@
 
 #define SNAKE 0
 #define SPACE 1
-#define FOO 2
-#define BAR 3
+#define TETRIS 2
+#define SPACE_TOO 3
+#define FOO 4
 
 
 void segfault_handler(int signal) {
@@ -43,8 +46,8 @@ void draw_options(struct fb *fb, struct font *ft, int selected) {
 
 	render_string(fb, ft, "SNAKE", false, 5, 10);
 	render_string(fb, ft, "SPACE", false, 5, 19);
-	render_string(fb, ft, "FOO", false, 5, 28);
-	render_string(fb, ft, "BAR", false, 5, 37);
+	render_string(fb, ft, "TETRIS", false, 5, 28);
+	render_string(fb, ft, "SPACE_TOO", false, 5, 37);
 	// render_string(fb, ft, "XXXXXXX", false, 5, 46);
 	// render_string(fb, ft, "YYYYYY", false, 5, 55);
 
@@ -103,11 +106,13 @@ int main(int argc, char **argv) {
 					printf("SNAKE\n");
 					snake(ft, fb, buttons_fd);
 					break;
-				case FOO:
-					printf("FOO\n");
+				case TETRIS:
+					printf("TETRIS\n");
+					tetris(ft, fb, buttons_fd);
 					break;
-				case BAR:
-					printf("BAR\n");
+				case SPACE_TOO:
+					printf("SPACE_TOO\n");
+					space_too(ft, fb, buttons_fd);
 					break;
 				default:
 					break;
