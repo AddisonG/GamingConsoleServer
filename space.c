@@ -1,4 +1,6 @@
 #include "engine.h"
+#include "space.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
@@ -8,29 +10,8 @@
 #define MAX_HEIGHT 64
 #define MAX_ASTEROIDS 50
 
-// define struct for spaceship
-struct spaceship {
-	int x, y;
-	int width, height;
-};
 
-// define struct for asteroid
-struct asteroid {
-	int x, y;
-	int width, height;
-};
-
-// define struct for game_state
-struct game_state {
-	int score;
-	int speed;
-	int danger;
-	struct spaceship player;
-	struct asteroid asteroids[MAX_ASTEROIDS];
-	int num_asteroids;
-};
-
-int play(struct game_state *game, struct button_state *buttons, struct fb *fb) {
+int play(struct space_game *game, struct button_state *buttons, struct fb *fb) {
 	// update spaceship position based on button input
 	if (buttons->up) {
 		game->player.y--;
@@ -122,16 +103,11 @@ int play(struct game_state *game, struct button_state *buttons, struct fb *fb) {
 }
 
 
-
-int main(int argc, char **argv) {
-	printf("INIT\n");
+int space(struct font *ft, struct fb *fb, int buttons_fd) {
+	printf("INIT SPACE\n");
 	srand(time(0));
-	char devname[] = "/dev/input/event0";
 
-	int fd = setup_buttons(devname);
-	struct font *ft = load_font("Tamsyn6x12r.psf");
-	struct fb *fb = fb_init("/dev/fb0");
-	struct game_state game = {0};
+	struct space_game game = {0};
 	int frame_num = 0;
 
 	// Speed is ms delay until next frame
@@ -147,7 +123,7 @@ int main(int argc, char **argv) {
 	while (true) {
 		clear_buffer(fb);
 		frame_num++;
-		struct button_state *buttons = read_buttons(fd);
+		struct button_state *buttons = read_buttons(buttons_fd);
 
 		// Let the player know about the increased danger!
 		if ((frame_num % 100) > 90) {
@@ -158,7 +134,7 @@ int main(int argc, char **argv) {
 			printf("GAME OVER\n");
 			printf("Score: %d\n", game.score);
 
-			usleep(1000 * 1000 * 3);
+			usleep(1000 * 1000 * 2);
 
 			char score_string[50];
 			sprintf(score_string, "SCORE: %d", game.score);
@@ -169,6 +145,9 @@ int main(int argc, char **argv) {
 			render_string(fb, ft, "= YOU LOSE =", false, 22, 28);
 			render_string(fb, ft, score_string, false, 33, 36);
 			swap_buffer(fb);
+
+			usleep(1000 * 1000 * 3);
+
 			return EXIT_SUCCESS;
 		}
 
@@ -184,7 +163,5 @@ int main(int argc, char **argv) {
 		usleep(1000 * game.speed);
 	}
 
-	free_font(ft);
-	close(fd);
 	return EXIT_SUCCESS;
 }

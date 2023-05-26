@@ -1,30 +1,13 @@
 #include "engine.h"
+#include "snake.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
 
-#define MAX_SNAKE_LEN 64
 
-#define WIDTH 25
-#define HEIGHT 13
-
-#define UP 0
-#define LEFT 1
-#define DOWN 2
-#define RIGHT 3
-
-struct game_state {
-	int x[MAX_SNAKE_LEN + 1];
-	int y[MAX_SNAKE_LEN + 1];
-	int length;
-	int direction;
-	int food_x;
-	int food_y;
-};
-
-
-bool move(struct game_state *game, struct button_state *buttons, struct fb *fb) {
+bool move(struct snake_game *game, struct button_state *buttons, struct fb *fb) {
 	// Move the tail of the snake
 	printf("Moving tail\n");
 	for (int i = game->length; i > 0; i--) {
@@ -114,15 +97,11 @@ bool move(struct game_state *game, struct button_state *buttons, struct fb *fb) 
 	return 0;
 }
 
-int main(int argc, char **argv) {
-	printf("INIT\n");
+int snake(struct font *ft, struct fb *fb, int buttons_fd) {
+	printf("INIT SNAKE\n");
     srand(time(0));
-	char devname[] = "/dev/input/event0";
 
-	int fd = setup_buttons(devname);
-	struct font *ft = load_font("Tamsyn6x12r.psf");
-	struct fb *fb = fb_init("/dev/fb0");
-	struct game_state game = {0};
+	struct snake_game game = {0};
 	int frame_num = 0;
 
 	// Speed is ms delay until next frame
@@ -142,7 +121,7 @@ int main(int argc, char **argv) {
 	printf("START\n");
 	while (true) {
 		frame_num++;
-		struct button_state *buttons = read_buttons(fd);
+		struct button_state *buttons = read_buttons(buttons_fd);
 
 		if (move(&game, buttons, fb)) {
 			printf("GAME OVER!\n");
@@ -158,6 +137,8 @@ int main(int argc, char **argv) {
 			render_string(fb, ft, score_string, false, 33, 36);
 			swap_buffer(fb);
 
+			usleep(1000 * 1000 * 5);
+
 			return EXIT_SUCCESS;
 		}
 
@@ -170,7 +151,5 @@ int main(int argc, char **argv) {
 		usleep(1000 * speed);
 	}
 
-	free_font(ft);
-	close(fd);
 	return EXIT_SUCCESS;
 }
