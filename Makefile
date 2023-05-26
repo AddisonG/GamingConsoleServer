@@ -22,7 +22,10 @@ output/space_too: space_too.c engine.o
 output/tetris: tetris.c engine.o
 	$(CC) $(CFLAGS) -o $@ $^ -L/home/addison/personal/hackathon-2023 -lfb
 
-output/menu: menu.c engine.o space.o snake.o tetris.o space_too.o
+output/remember: remember.c engine.o
+	$(CC) $(CFLAGS) -o $@ $^ -L/home/addison/personal/hackathon-2023 -lfb
+
+output/menu: menu.c engine.o space.o snake.o tetris.o space_too.o remember.o
 	$(CC) $(CFLAGS) -o $@ $^ -L/home/addison/personal/hackathon-2023 -lfb
 
 ethan/%: ethan/%.c
@@ -31,7 +34,7 @@ ethan/%: ethan/%.c
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-install: output/snake output/space output/tetris output/menu output/space_too
+install: output/snake output/space output/tetris output/space_too output/remember output/menu
 
 scp: install
 	scp output/* root@192.168.75.140:/var/mnt/storage.usb/

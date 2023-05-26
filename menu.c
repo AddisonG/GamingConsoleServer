@@ -3,6 +3,7 @@
 #include "space_too.h"
 #include "snake.h"
 #include "tetris.h"
+#include "remember.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,30 +12,16 @@
 #include <signal.h>
 
 
-#define NUM_GAMES 4
+#define NUM_GAMES 5
 
 #define SNAKE 0
 #define SPACE 1
 #define TETRIS 2
 #define SPACE_TOO 3
-#define FOO 4
+#define REMEMBER 4
 
 
 void segfault_handler(int signal) {
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
-	printf("ERROR! SEGFAULT!\n");
 	printf("ERROR! SEGFAULT!\n");
 }
 
@@ -48,7 +35,7 @@ void draw_options(struct fb *fb, struct font *ft, int selected) {
 	render_string(fb, ft, "SPACE", false, 5, 19);
 	render_string(fb, ft, "TETRIS", false, 5, 28);
 	render_string(fb, ft, "SPACE_TOO", false, 5, 37);
-	// render_string(fb, ft, "XXXXXXX", false, 5, 46);
+	render_string(fb, ft, "REMEMBER", false, 5, 46);
 	// render_string(fb, ft, "YYYYYY", false, 5, 55);
 
 	// Draw box around selected option
@@ -113,6 +100,10 @@ int main(int argc, char **argv) {
 				case SPACE_TOO:
 					printf("SPACE_TOO\n");
 					space_too(ft, fb, buttons_fd);
+					break;
+				case REMEMBER:
+					printf("REMEMBER\n");
+					remember(ft, fb, buttons_fd);
 					break;
 				default:
 					break;

@@ -69,7 +69,7 @@ bool is_collision(struct tetris_game *game, int x, int y) {
         int block_x = x + game->current_tetromino.blocks[i].x;
         int block_y = y + game->current_tetromino.blocks[i].y;
 		printf("%d, %d\n", block_x, block_y);
-        if (block_x < 0 || block_x >= GAME_WIDTH || block_y < 0 || block_y >= GAME_HEIGHT || game->field[block_y][block_x]) {
+        if (block_x >= GAME_WIDTH || game->field[block_y][block_x]) {
             return true;
         }
     }
@@ -135,6 +135,7 @@ bool move_piece(struct tetris_game *game, struct button_state *buttons) {
                 // game over
                 return true;
             }
+			printf("COLLIDE: %d, %d \n", x, y);
             game->field[y][x] = 1;
         }
         check_lines(game);
