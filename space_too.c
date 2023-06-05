@@ -410,11 +410,11 @@ int space_too(struct font *ft, struct fb *fb, int buttons_fd) {
 		struct button_state* buttons = read_buttons(buttons_fd);
 
 		if (buttons->up) {
-        		player.y_dir = Y_FORWARD;
-        	}
-        	if (buttons->down) {
-        		player.y_dir = Y_BACKWARD;
-        	}
+				player.y_dir = Y_FORWARD;
+			}
+			if (buttons->down) {
+				player.y_dir = Y_BACKWARD;
+			}
 		if (buttons->back) {
 			spawn_bullet(&player);
 		}
@@ -430,15 +430,17 @@ int space_too(struct font *ft, struct fb *fb, int buttons_fd) {
 		usleep(100000);
 	}
 
-        char score_string[50];
-        sprintf(score_string, "SCORE: %d", player.score);
+	char score_string[50];
+	sprintf(score_string, "SCORE: %d", player.score);
 
-        clear_buffer(fb);
-        draw_box(fb, 1, 1, 126, 62, false);
-        render_string(fb, ft, "= GAME OVER =", false, 20, 20);
-        render_string(fb, ft, "= YOU LOSE =", false, 23, 28);
-        render_string(fb, ft, score_string, false, 33, 36);
-        swap_buffer(fb);
+	clear_buffer(fb);
+	draw_box(fb, 1, 1, 126, 62, false);
+	render_string(fb, ft, "= GAME OVER =", false, 20, 20);
+	render_string(fb, ft, "= YOU LOSE =", false, 23, 28);
+	render_string(fb, ft, score_string, false, 33, 36);
+	swap_buffer(fb);
+
+	usleep(1000 * 5000);
 
 	return 0;
 }

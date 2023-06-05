@@ -199,6 +199,11 @@ int tetris(struct font *ft, struct fb *fb, int buttons_fd) {
 			printf("==SPEED INCREASE==!\nNew speed: %d\n", speed);
 		}
 
+		if (frame_num > 4000) {
+			// This game is broken
+			return EXIT_SUCCESS;
+		}
+
 		usleep(1000 * speed);
 	}
 
