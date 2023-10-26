@@ -1,3 +1,6 @@
+Worked with Ethan Roderick and Cameron Scott to deliver this amazing project.
+
+---
 
 Must run on device:
 
